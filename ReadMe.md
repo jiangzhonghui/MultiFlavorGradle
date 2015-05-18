@@ -3,13 +3,15 @@
 
 1. build-config: Adding common files here.
  
- 			|
-			--res
+ 		
 		    |
 		    --assets
 		       |
 		       --system.properties
-  			   --values
+
+		    --res
+			|
+			--values
 		       		|
   		      		--environment.xml
 
