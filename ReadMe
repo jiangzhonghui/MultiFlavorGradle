@@ -1,5 +1,5 @@
-#Understanding studio folder structure and maintain seperate builds:
-
+# Understanding studio folder structure and maintain seperate builds:
+====================================================================
 
 1. build-config: Adding common files here.
   |
