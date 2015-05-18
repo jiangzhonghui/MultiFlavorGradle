@@ -1,0 +1,114 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "com.andhradroid.multiflavorgradle"
+        minSdkVersion 14
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+        dev {
+
+        }
+        qa {
+
+        }
+    }
+
+}
+android.productFlavors.collect { it.name }.each {
+    def flavorName = it
+    def fileProperties = file("build-config/${flavorName}.properties")
+    if (fileProperties.exists()) {
+        def Properties properties = getDefaultProperties()
+        properties.load(new FileInputStream(fileProperties))
+//            copyResFiles(properties, file('../mvn-config/res'), file("build/generated/res-${flavorName}/"))
+        copyResFiles(properties, file('../build-config'), file("src/${flavorName}/"))
+    }
+}
+
+
+def getDefaultProperties() {
+    def Properties properties = new Properties()
+    return properties
+}
+
+/**
+ * Copy and filter res files
+ * @param properties
+ * @param sourceLocation
+ * @param targetLocation
+ * @return
+ */
+def copyResFiles(Properties properties, File sourceLocation, File targetLocation) {
+    println 'copyResFiles, from: ' + sourceLocation + ', to: ' + targetLocation
+
+    if (sourceLocation.isDirectory()) {
+        if (!targetLocation.exists()) {
+            targetLocation.mkdir();
+        }
+
+        File[] children = sourceLocation.listFiles()
+        for (int i = 0; i < children.length; i++) {
+            if (children[i].isDirectory() && (children[i].name.equals(".svn") || children[i].name.equals(".git"))) {
+                //Ignore .svn directory
+            } else {
+                copyResFiles(properties, new File(sourceLocation, children[i].name), new File(targetLocation, children[i].name))
+            }
+        }
+    } else {
+        if (sourceLocation.getName().endsWith('.xml') ||
+                sourceLocation.getName().endsWith('.cfg')) {
+            try {
+                def content = sourceLocation.getText('UTF-8')
+                for (Map.Entry property in properties) {
+                    content = content.replace('${' + property.key + '}', property.value)
+                }
+                targetLocation.write(content, 'UTF-8')
+            }
+            catch (Exception e) {
+                e.printStackTrace()
+                println 'copyResFiles() e: ' + e
+            }
+        } else {
+
+            def InputStream input = null
+            def OutputStream output = null
+            try {
+                input = new FileInputStream(sourceLocation)
+                output = new FileOutputStream(targetLocation)
+                def byte[] buf = new byte[1024]
+                def int bytesRead
+                while ((bytesRead = input.read(buf)) > 0) {
+                    output.write(buf, 0, bytesRead)
+                }
+            } finally {
+                try {
+                    if (input != null)
+                        input.close()
+                    if (output != null)
+                        output.close()
+                }
+                catch (Exception e) {
+                }
+            }
+        }
+    }
+    return true
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.1.1'
+}
