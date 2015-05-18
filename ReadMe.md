@@ -2,7 +2,8 @@
 ====================================================================
 
 1. build-config: Adding common files here.
-  |
+ 
+ |
   --res
      |
      --assets
@@ -15,6 +16,7 @@
 2. Add configuration values in 'build-config' under 'app' folder.
 
  In this sample:
+
   app
   |
   --build.config
@@ -30,12 +32,14 @@
 
 3. Build script is copy these resources bases on the flavors such as QA,DEV in 'app/src' folder
 
+
      app
      |
      --build.gradle (written code for replace the content of build-config)
 
 
 Finally Directory structure would be in the following structure:
+
 
  app
   |
