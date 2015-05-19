@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+//Read version properties from version.properties file
+def verName=getVersionProperties();
 android {
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
@@ -9,12 +11,20 @@ android {
         minSdkVersion 14
         targetSdkVersion 22
         versionCode 1
-        versionName "1.0"
+        versionName verName
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        //Rename output apk file by appending verionName.
+        applicationVariants.all { variant ->
+            variant.outputs.each { output ->
+                def apk = output.outputFile;
+                def newName = variant.baseName.replace(".apk", "") + "-" +verName+".apk"; //defaultConfig.versionName + ".apk";
+                output.outputFile = new File(apk.parentFile, newName);
+            }
         }
     }
     productFlavors {
@@ -42,6 +52,18 @@ android.productFlavors.collect { it.name }.each {
 def getDefaultProperties() {
     def Properties properties = new Properties()
     return properties
+}
+
+def getVersionProperties() {
+    def fileProperties = file("../version.properties")
+    if (fileProperties.exists()) {
+        def Properties properties = new Properties();
+        properties.load(new FileInputStream(fileProperties))
+        def versoin = properties.get("major") +"."+ properties.get("minor")+"." + properties.get("build")
+        println 'version propeties ' +versoin
+        return versoin;
+    }
+    return project.getVersion();
 }
 
 /**
